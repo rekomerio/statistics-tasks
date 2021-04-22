@@ -4,13 +4,13 @@ import "./style.scss";
 import "whatwg-fetch";
 import Articles from "./Articles";
 
-const articles = new Articles();
-
 function getCurrentPage() {
-    return window.location.pathname.split("/")[1] || 1;
+    return parseInt(window.location.hash.substr(1)) || 0;
 }
 
 function onLoadPage() {
+    const articles = new Articles();
+
     const page = getCurrentPage();
 
     const clearActiveAttribute = () => {
@@ -33,6 +33,12 @@ function onLoadPage() {
         clearActiveAttribute();
         btnNarrow.setAttribute("data-active", "true");
         articles.setCompactMode(true);
+    });
+
+    const btnLoadMore = document.getElementById("load-more");
+
+    btnLoadMore.addEventListener("click", () => {
+        articles.loadMoreAndDisplay(btnLoadMore);
     });
 
     articles.getAndDisplayArticles(page);
