@@ -22,7 +22,11 @@ export default class Articles {
     }
 
     setCompactMode(isCompact) {
+        const old = this.isCompact;
         this.isCompact = isCompact;
+
+        if (isCompact === old) return;
+
         this.render();
     }
 
@@ -55,7 +59,7 @@ export default class Articles {
             "class",
             "article-id ".concat(this.getContentType(article.content_type)).trimEnd()
         );
-        const idText = document.createElement("p");
+        const idText = document.createElement("span");
         idText.textContent = article.site_id;
 
         if (this.getContentType(article.content_type) === "") {
@@ -66,20 +70,14 @@ export default class Articles {
 
         id.appendChild(idText);
 
-        if (!this.isCompact) {
-            const img = document.createElement("img");
-            img.setAttribute("src", article.img_url);
-            container.appendChild(img);
-        }
-
         const content = document.createElement("div");
         content.setAttribute("class", "article-content");
 
-        const type = document.createElement("p");
+        const type = document.createElement("span");
         type.setAttribute("class", "article-type");
         type.textContent = article.content_type;
 
-        const date = document.createElement("p");
+        const date = document.createElement("span");
         date.setAttribute("class", "article-date");
         date.textContent =
             differenceInDays(new Date(), new Date(article.content_date)) + " päivää sitten";
@@ -90,6 +88,12 @@ export default class Articles {
         title.textContent = article.title_original;
 
         container.appendChild(id);
+
+        if (!this.isCompact) {
+            const img = document.createElement("img");
+            img.setAttribute("src", article.img_url);
+            container.appendChild(img);
+        }
 
         content.appendChild(type);
         content.appendChild(date);
