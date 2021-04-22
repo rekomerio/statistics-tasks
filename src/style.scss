@@ -202,3 +202,62 @@ hr.vertical {
 .flex {
     display: flex;
 }
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 16px 0px;
+}
+
+.load-more-button {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 16px 48px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    margin: auto;
+}
+
+@media screen and (min-width: 780px) {
+    .load-more-button {
+        display: none;
+    }
+}
+
+.load-more-button:disabled {
+    background-color: gray;
+}
+
+#button-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media screen and (max-width: 780px) {
+    #button-group {
+        display: none;
+    }
+}
+
+.pagination-button {
+    background-color: gray;
+    border: none;
+    color: white;
+    padding: 8px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1em;
+    margin: auto;
+}
+
+.pagination-button[data-selected="true"] {
+    background-color: var(--primary-color);
+}

@@ -6,10 +6,11 @@ export default class Articles {
         this.data = null;
         this.articles = [];
         this.isCompact = false;
-        this.previousPage = 0;
+        this.currentPage = 0;
     }
 
     getAndDisplayArticles(page) {
+        this.currentPage = page;
         fetch(GLOBALS.API_ENDPOINT + page)
             .then((response) => response.json())
             .then((data) => {
@@ -24,17 +25,25 @@ export default class Articles {
     }
 
     loadMoreAndDisplay(element) {
+        let hasError = true;
         element.disabled = true;
-        ++this.previousPage;
-        fetch(GLOBALS.API_ENDPOINT + this.previousPage)
+        ++this.currentPage;
+        fetch(GLOBALS.API_ENDPOINT + this.currentPage)
             .then((response) => response.json())
             .then((data) => {
+                if (!data.response) {
+                    hasError = true;
+                    return;
+                }
                 this.articles = [...this.articles, ...data.response.docs];
                 this.render(); // TODO => In render dont remove old elements
             })
-            .catch((err) => void console.error(err))
+            .catch((err) => {
+                console.error(err);
+                hasError = true;
+            })
             .finally(() => {
-                if (this.articles.length < this.data.numFound) {
+                if (this.articles.length < this.data.numFound && !hasError) {
                     element.disabled = false;
                 } else {
                     element.textContent = "Ei lisää julkaisuja";
