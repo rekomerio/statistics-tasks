@@ -2,11 +2,11 @@ import { differenceInDays } from "date-fns";
 import * as GLOBALS from "./globals";
 
 export default class Articles {
-    Articles() {
+    constructor() {
         this.data = null;
         this.articles = [];
         this.isCompact = false;
-        this.previousPage = 1;
+        this.previousPage = 0;
     }
 
     getAndDisplayArticles(page) {
@@ -23,15 +23,23 @@ export default class Articles {
             .catch((err) => void console.error(err));
     }
 
-    loadMoreAndDisplay() {
+    loadMoreAndDisplay(element) {
+        element.disabled = true;
         ++this.previousPage;
         fetch(GLOBALS.API_ENDPOINT + this.previousPage)
             .then((response) => response.json())
             .then((data) => {
                 this.articles = [...this.articles, ...data.response.docs];
-                this.render();
+                this.render(); // TODO => In render dont remove old elements
             })
-            .catch((err) => void console.error(err));
+            .catch((err) => void console.error(err))
+            .finally(() => {
+                if (this.articles.length < this.data.numFound) {
+                    element.disabled = false;
+                } else {
+                    element.textContent = "Ei lisää julkaisuja";
+                }
+            });
     }
 
     setCompactMode(isCompact) {
