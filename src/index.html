@@ -5,19 +5,21 @@
         <title>Title</title>
     </head>
     <body>
-        <h1>Julkaisut</h1>
-        <p id="num-results">0 tulosta</p>
-        <div class="views-actions">
-            <div class="views-actions-container">
-                <span>Sivuston näkymät</span>
-                <div id="button-wide" class="view-button" data-active="true">
-                    <span>Laaja</span>
-                </div>
-                <div id="button-narrow" class="view-button">
-                    <span>Suppea</span>
+        <div class="top">
+            <h1>Julkaisut</h1>
+            <p id="num-results">0 tulosta</p>
+            <div class="views-actions">
+                <div class="views-actions-container">
+                    <span>Sivuston näkymät</span>
+                    <button id="button-wide" class="view-button" data-active="true">
+                        <span>Laaja</span>
+                    </button>
+                    <button id="button-narrow" class="view-button">
+                        <span>Suppea</span>
+                    </button>
                 </div>
             </div>
         </div>
-        <div id="articles"></div>
+        <section id="articles"></section>
     </body>
 </html>
