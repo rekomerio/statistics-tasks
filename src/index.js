@@ -2,6 +2,7 @@ import "purecss";
 import "purecss/build/grids-responsive.css";
 import "./style.scss";
 import "whatwg-fetch";
+import { differenceInDays } from "date-fns";
 
 import * as GLOBALS from "./globals";
 
@@ -65,7 +66,8 @@ function createArticleElement(article, size) {
 
     const date = document.createElement("p");
     date.setAttribute("class", "article-date");
-    date.textContent = article.content_date;
+    date.textContent =
+        differenceInDays(new Date(), new Date(article.content_date)) + " päivää sitten";
 
     const title = document.createElement("a");
     title.setAttribute("class", "article-title");
