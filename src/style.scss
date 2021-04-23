@@ -49,6 +49,13 @@ body {
     cursor: pointer;
     outline: inherit;
     padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.view-button > img {
+    width: 24px;
 }
 
 button:focus {
