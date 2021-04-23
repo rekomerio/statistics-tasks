@@ -67,7 +67,13 @@ function onLoadPage() {
 
     // In case of going back in history
     window.addEventListener("hashchange", () => {
-        articles.getAndDisplayArticles(getCurrentPage());
+        const currPage = getCurrentPage();
+        articles.getAndDisplayArticles(currPage);
+
+        if (currPage < 0 || currPage > 2)
+            for (const button of document.getElementsByClassName("pagination-button")) {
+                button.removeAttribute("data-selected");
+            }
     });
 }
 

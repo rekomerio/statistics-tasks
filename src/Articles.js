@@ -1,5 +1,11 @@
-import { differenceInDays } from "date-fns";
 import * as GLOBALS from "./globals";
+import { niceDateFormat } from "./utils";
+
+const States = {
+    Error: 0,
+    Loading: 1,
+    Default: 2,
+};
 
 export default class Articles {
     constructor() {
@@ -7,47 +13,67 @@ export default class Articles {
         this.articles = [];
         this.isCompact = false;
         this.currentPage = 0;
+        this.state = States.Default;
     }
 
     getAndDisplayArticles(page) {
         this.currentPage = page;
+        this.state = States.Loading;
+        this.render();
         fetch(GLOBALS.API_ENDPOINT + page)
             .then((response) => response.json())
             .then((data) => {
+                this.state = States.Default;
+
+                if (!data.response) {
+                    this.articles = [];
+                    return;
+                }
+
                 this.data = data.response;
                 this.articles = data.response.docs;
                 document.getElementById(
                     "num-results"
                 ).textContent = `${data.response.numFound} tulosta`;
-                this.render();
-            })
-            .catch((err) => void console.error(err));
-    }
-
-    loadMoreAndDisplay(element) {
-        let hasError = true;
-        element.disabled = true;
-        ++this.currentPage;
-        fetch(GLOBALS.API_ENDPOINT + this.currentPage)
-            .then((response) => response.json())
-            .then((data) => {
-                if (!data.response) {
-                    hasError = true;
-                    return;
-                }
-                this.articles = [...this.articles, ...data.response.docs];
-                this.render(); // TODO => In render dont remove old elements
             })
             .catch((err) => {
                 console.error(err);
-                hasError = true;
+                this.state = States.Error;
             })
             .finally(() => {
-                if (this.articles.length < this.data.numFound && !hasError) {
+                this.render();
+            });
+    }
+
+    loadMoreAndDisplay(element) {
+        let isEmptyResponse = false;
+        element.disabled = true;
+        ++this.currentPage;
+        this.state = States.Loading;
+        this.render();
+        fetch(GLOBALS.API_ENDPOINT + this.currentPage)
+            .then((response) => response.json())
+            .then((data) => {
+                this.state = States.Default;
+
+                if (!data.response) {
+                    isEmptyResponse = true;
+                    return;
+                }
+
+                this.articles = [...this.articles, ...data.response.docs];
+            })
+            .catch((err) => {
+                console.error(err);
+                this.state = States.Error;
+            })
+            .finally(() => {
+                if (this.articles.length < this.data.numFound && !isEmptyResponse) {
                     element.disabled = false;
                 } else {
                     element.textContent = "Ei lisää julkaisuja";
                 }
+                this.render();
             });
     }
 
@@ -59,6 +85,61 @@ export default class Articles {
     }
 
     render() {
+        this.removeOverlay();
+        switch (this.state) {
+            case States.Default:
+                this.renderArticles();
+                break;
+            case States.Error: {
+                this.renderOverlay("Virhe tapahtui. Päivitä sivu");
+                break;
+            }
+            case States.Loading: {
+                this.renderOverlay("Ladataan...");
+                break;
+            }
+        }
+    }
+
+    renderOverlay(msg) {
+        const overlay = document.createElement("div");
+        overlay.setAttribute("id", "overlay");
+        const text = document.createElement("h1");
+        text.textContent = msg;
+        overlay.appendChild(text);
+        document.body.appendChild(overlay);
+    }
+
+    removeOverlay() {
+        const overlay = document.getElementById("overlay");
+
+        if (!overlay) {
+            return;
+        }
+
+        document.body.removeChild(overlay);
+    }
+
+    renderArticles() {
+        const articlesContainer = document.getElementById("articles");
+
+        if (!articlesContainer) {
+            console.error("Cannot find #articles element!");
+            return;
+        }
+
+        // Remove all existing children
+        while (articlesContainer.childElementCount) {
+            articlesContainer.removeChild(articlesContainer.childNodes[0]);
+        }
+
+        if (!this.articles.length) {
+            const msg = document.createElement("h1");
+            msg.textContent = "404";
+            articlesContainer.appendChild(msg);
+            return;
+        }
+
         const articleElements = this.articles.map((article) =>
             this.createArticleElement(article)
         );
@@ -69,17 +150,10 @@ export default class Articles {
             fragment.appendChild(element);
         });
 
-        const articlesContainer = document.getElementById("articles");
-
         if (this.isCompact) {
             articlesContainer.setAttribute("class", "compact");
         } else {
             articlesContainer.removeAttribute("class");
-        }
-
-        // Remove all existing children
-        while (articlesContainer.childElementCount) {
-            articlesContainer.removeChild(articlesContainer.childNodes[0]);
         }
 
         articlesContainer.appendChild(fragment);
@@ -101,8 +175,7 @@ export default class Articles {
 
         const date = document.createElement("span");
         date.setAttribute("class", "article-date");
-        date.textContent =
-            differenceInDays(new Date(), new Date(article.content_date)) + " päivää sitten";
+        date.textContent = niceDateFormat(new Date(), new Date(article.content_date));
 
         const title = document.createElement("a");
         title.setAttribute("class", this.withCompact("article-title"));
